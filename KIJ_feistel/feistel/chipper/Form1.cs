@@ -137,7 +137,7 @@ namespace feistel
 
         #region Files
 
-        private static void EncryptFile(string fileInPath, string fileOutPath, Func<byte, byte, byte> FunctionF, byte[] keys)
+        private static void EncryptFile(string fileInPath, Func<byte, byte, byte> FunctionF, byte[] keys)
         {
             byte[] file = File.ReadAllBytes(fileInPath);
             byte[] encFile = new byte[file.Length];
@@ -145,12 +145,23 @@ namespace feistel
             {
                 encFile[i] = Encrypt(file[i], FunctionF, keys);
             }
-            string someString = Encoding.ASCII.GetString(encFile);
+            //string someString = Encoding.ASCII.GetString(encFile);
             //Console.WriteLine("encrypt: " + someString);
-            File.WriteAllBytes(fileOutPath, encFile);
+            MessageBox.Show("Encode complete!\nSelect directory to save file.");
+            using (var sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                sfd.FilterIndex = 1;
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllBytes(sfd.FileName, encFile);
+                    //File.WriteAllText(sfd.FileName, "");
+                }
+            }
         }
 
-        private static void DecryptFile(string fileInPath, string fileOutPath, Func<byte, byte, byte> FunctionF, byte[] keys)
+        private static void DecryptFile(string fileInPath, Func<byte, byte, byte> FunctionF, byte[] keys)
         {
             byte[] file = File.ReadAllBytes(fileInPath);
             byte[] decFile = new byte[file.Length];
@@ -158,7 +169,18 @@ namespace feistel
             {
                 decFile[i] = Decrypt(file[i], FunctionF, keys);
             }
-            File.WriteAllBytes(fileOutPath, decFile);
+            MessageBox.Show("Decode complete!\nSelect directory to save file.");
+            using (var sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                sfd.FilterIndex = 1;
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllBytes(sfd.FileName, decFile);
+                    //File.WriteAllText(sfd.FileName, "");
+                }
+            }
         }
 
         #endregion
@@ -182,14 +204,14 @@ namespace feistel
             {
                 string key = textBox2.Text;   //Variabel kata kunci
                 byte[] keys = Encoding.ASCII.GetBytes(key);
-
+                
                 if (mode == 0)
                 {
-                    EncryptFile(textBox1.Text, textBox3.Text, FunctionF, keys);
+                    EncryptFile(textBox1.Text, FunctionF, keys);
                 }
                 else
                 {
-                    DecryptFile(textBox1.Text, textBox3.Text, FunctionF, keys);
+                    DecryptFile(textBox1.Text, FunctionF, keys);
                 }
             }
         }
@@ -216,12 +238,5 @@ namespace feistel
             //richTextBox2.Text = "";
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                textBox3.Text = openFileDialog1.FileName;
-            }
-        }
     }
 }
